@@ -166,6 +166,3 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
 
     Save2Csv(mesh_map,savename)
 
-
-
-Mesh(0,80,0,80,1,filename,24000,savename)
