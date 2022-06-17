@@ -6,6 +6,7 @@ import math
 import numpy as np
 
 filename = 'D:\membrane.lammpstrj'
+savename = 'D:\membrane.csv'
 
 def check_input(x_num, y_num):
     if(x_num>=2 and y_num>=2):
@@ -27,8 +28,11 @@ def read_data(filename, timestep):
         except:
             return []
         if(l.strip()==keyword_before):
+            
             current = int(f.readline().strip())
+            print(current)
             if(current == timestep):
+                print("Find Success.")
                 return get_data(f)
                 
             continue
@@ -36,14 +40,16 @@ def read_data(filename, timestep):
             continue
     print('cannot find timestep %f in %s'%(timestep,filename))
 
-def get_data(f:TextIOWrapper):
+def get_data(f):
     result = []
     f.readline()
     atom_num = int(f.readline().strip())
+    print("Atom Number is %f"%atom_num)
     for i in range(4):
         f.readline()
     #find lammpstrj xyz
-    l_key =' '.split(f.readline().strip())
+    l_key =f.readline().strip().split()
+    print(l_key)
     x_index = 0
     y_index = 0
     z_index = 0
@@ -62,7 +68,7 @@ def get_data(f:TextIOWrapper):
         
     for i in range(atom_num):
 
-        temp = ' '.split(f.readline().strip())
+        temp = (f.readline().strip()).split()
         process_temp = [eval(temp[x_index]),eval(temp[y_index]),eval(temp[z_index])]
         result.append(process_temp)
     return result
@@ -73,26 +79,31 @@ def avg(position:list, count, new_position):
     new_z = (position[2]*count + new_position[2])/(count+1)
     return [new_x, new_y, new_z]
 
-def Save2Csv(datalist):
-     with open('D:\membrane.csv', 'w') as csvFile:
-         writer = csv.writer(csvFile)
-         writer.writerow(['Position.X','Position.Y','Position.Z',"Count","Curvature"])
-         for item1 in datalist:
-             for item2 in item1:
-                writer.writerow([item2[0][0],item2[0][1],item2[0][2],item2[1],item2[2]])
+def Save2Csv(datalist,savename):
+    with open(savename, 'w') as csvFile:
+        writer = csv.writer(csvFile)
+        writer.writerow(['Position.X','Position.Y','Position.Z',"Count","Curvature"])
+        for item1 in datalist:
+            for item2 in item1:
+                write_form = [item2[0][0],item2[0][1],item2[0][2],item2[1],item2[2]]
+                print(write_form)
+                writer.writerow(write_form)
+    lines = ''
+    with open(savename, 'rt') as csvFile:
+        for line in csvFile:
+            if(line != '\n'):
+                lines+=line
+    with open(savename, 'w') as csvFile:
+        csvFile.write(lines)
 
-    
-
-    
-
-def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep):
+def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,savename):
     
     x_point_num = int((x_high_b - x_low_b)/grid_width) + 1
     y_point_num = int((y_high_b - y_low_b)/grid_width) + 1
     if(not check_input(x_point_num,y_point_num)):
         print("Mesh Input is incorrect, please try again.")
     # initialize a map
-    mesh_map = [[[[0,0,0], 0, 0] for j in range(y_point_num-1)] for i in range(x_point_num-1)]
+    mesh_map = [[[[0,0,0], 0, 0] for _ in range(y_point_num-1)] for i in range(x_point_num-1)]
     datalist = read_data(filename,timestep)
     if(len(datalist)==0):
         print("Error code: -1.")
@@ -105,13 +116,8 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep):
             mesh_map[i_index][j_index][1] += 1
     
 
-    
+    Save2Csv(mesh_map,savename)
 
 
 
-
-
-
-
-f= (0,1,3)
-print(f*2)
+Mesh(0,80,0,80,1,filename,24000,savename)
