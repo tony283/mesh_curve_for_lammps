@@ -78,15 +78,16 @@ def avg(position:list, count, new_position):
     new_z = (position[2]*count + new_position[2])/(count+1)
     return [new_x, new_y, new_z]
 
-def calculate_k(a0,a1,a2,a3,a4,x,y):
+def calculate_k(a0,a1,a2,a3,a4,a5,x,y):
     u =2*a3*x+a1
     v = 2*a4*y+a2
     E = 1+math.pow(u,2)
     F = u*v
     G = 1+math.pow(v,2)
+    M = a5/(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
     L = 2*a3*(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
     N = 2*a4*(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
-    H = (E*N+G*L)/(2*(E*G-F*F))
+    H = (E*N-2*F*M+G*L)/(2*(E*G-F*F))
     return H
 
 def fit_curve(datalist):
@@ -94,7 +95,7 @@ def fit_curve(datalist):
     X = []
     for item in datalist:
         Y.append(item[2]) 
-        X.append([1,item[0],item[1],item[0]*item[0],item[1]*item[1]])
+        X.append([1,item[0],item[1],item[0]*item[0],item[1]*item[1],item[0]*item[1]])
     X = np.array(X)
     Y = np.array(Y)
     theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
@@ -158,7 +159,7 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
                 for index2 in [d,j,u]:
                     curvature_list.append(mesh_map[index1][index2][0])
             theta = fit_curve(curvature_list)
-            curvature = calculate_k(theta[0],theta[1],theta[2],theta[3],theta[4],mesh_map[i][j][0][0],mesh_map[i][j][0][1])
+            curvature = calculate_k(theta[0],theta[1],theta[2],theta[3],theta[4],theta[5],mesh_map[i][j][0][0],mesh_map[i][j][0][1])
             print(curvature)
             mesh_map[i][j][2] = curvature
                 
