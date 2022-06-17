@@ -1,7 +1,6 @@
 ## read style filename [each line] x, y, z ...
 ## save style: mesh.xls [each line] x, y, z, count, curvature
 import csv
-from io import TextIOWrapper
 import math
 import numpy as np
 
@@ -79,6 +78,31 @@ def avg(position:list, count, new_position):
     new_z = (position[2]*count + new_position[2])/(count+1)
     return [new_x, new_y, new_z]
 
+def calculate_k(a0,a1,a2,a3,a4,x,y):
+    u =2*a3*x+a1
+    v = 2*a4*y+a2
+    E = 1+math.pow(u,2)
+    F = u*v
+    G = 1+math.pow(v,2)
+    L = 2*a3*(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
+    N = 2*a4*(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
+    H = (E*N+G*L)/(2*(E*G-F*F))
+    return H
+
+def fit_curve(datalist):
+    Y = []
+    X = []
+    for item in datalist:
+        Y.append(item[2]) 
+        X.append([1,item[0],item[1],item[0]*item[0],item[1]*item[1]])
+    X = np.array(X)
+    Y = np.array(Y)
+    theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
+    return theta
+    
+
+
+
 def Save2Csv(datalist,savename):
     with open(savename, 'w') as csvFile:
         writer = csv.writer(csvFile)
@@ -114,10 +138,35 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
         if(0<=i_index<=x_point_num-2 and 0<=j_index<=y_point_num-2):
             mesh_map[i_index][j_index][0] = avg(mesh_map[i_index][j_index][0],mesh_map[i_index][j_index][1],item)
             mesh_map[i_index][j_index][1] += 1
-    
+    #start to calculate curvature
+    for i in range(x_point_num-1):
+        for j in range(y_point_num-1):
+            curvature_list = []
+            l= i-1
+            r=i+1
+            u = j+1
+            d = j-1
+            if(i==0):
+                l = -1
+            if(j==0):
+                d = -1
+            if(i == x_point_num-2):
+                r = 0
+            if(j == y_point_num-2):
+                u = 0
+            for index1 in [l,i,r]:
+                for index2 in [d,j,u]:
+                    curvature_list.append(mesh_map[index1][index2][0])
+            theta = fit_curve(curvature_list)
+                
+
 
     Save2Csv(mesh_map,savename)
 
 
 
-Mesh(0,80,0,80,1,filename,24000,savename)
+#Mesh(0,80,0,80,1,filename,24000,savename)
+a = np.array([1,2,3])
+
+
+print(a[0])
