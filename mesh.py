@@ -158,6 +158,9 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
                 for index2 in [d,j,u]:
                     curvature_list.append(mesh_map[index1][index2][0])
             theta = fit_curve(curvature_list)
+            curvature = calculate_k(theta[0],theta[1],theta[2],theta[3],theta[4],mesh_map[i][j][0][0],mesh_map[i][j][0][1])
+            print(curvature)
+            mesh_map[i][j][2] = curvature
                 
 
 
@@ -165,8 +168,4 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
 
 
 
-#Mesh(0,80,0,80,1,filename,24000,savename)
-a = np.array([1,2,3])
-
-
-print(a[0])
+Mesh(0,80,0,80,1,filename,24000,savename)
