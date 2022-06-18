@@ -88,7 +88,15 @@ def calculate_k(a0,a1,a2,a3,a4,a5,x,y):
     L = 2*a3*(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
     N = 2*a4*(1/math.sqrt(1+math.pow(u,2)+math.pow(v,2)))
     H = (E*N-2*F*M+G*L)/(2*(E*G-F*F))
-    return H
+    K = (L*N - M*M)/(E*G-F*F)
+    return [H,K]
+
+def calculate_tension(mesh_map,width):
+    tension = 0
+    for i in mesh_map:
+        for item in i:
+            tension 
+
 
 def fit_curve(datalist):
     Y = []
@@ -107,10 +115,10 @@ def fit_curve(datalist):
 def Save2Csv(datalist,savename):
     with open(savename, 'w') as csvFile:
         writer = csv.writer(csvFile)
-        writer.writerow(['Position.X','Position.Y','Position.Z',"Count","Curvature"])
+        writer.writerow(['Position.X','Position.Y','Position.Z',"Count","Average Curvature", "Gaussian Curvature"])
         for item1 in datalist:
             for item2 in item1:
-                write_form = [item2[0][0],item2[0][1],item2[0][2],item2[1],item2[2]]
+                write_form = [item2[0][0],item2[0][1],item2[0][2],item2[1],item2[2],item2[3]]
                 print(write_form)
                 writer.writerow(write_form)
     lines = ''
@@ -128,7 +136,7 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
     if(not check_input(x_point_num,y_point_num)):
         print("Mesh Input is incorrect, please try again.")
     # initialize a map
-    mesh_map = [[[[0,0,0], 0, 0] for _ in range(y_point_num-1)] for i in range(x_point_num-1)]
+    mesh_map = [[[[0,0,0], 0, 0,0] for _ in range(y_point_num-1)] for i in range(x_point_num-1)]
     datalist = read_data(filename,timestep)
     if(len(datalist)==0):
         print("Error code: -1.")
@@ -143,25 +151,31 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
     for i in range(x_point_num-1):
         for j in range(y_point_num-1):
             curvature_list = []
-            l= i-1
-            r=i+1
-            u = j+1
-            d = j-1
+            l,l1,r,r1,u,u1,d,d1= i-1,i-2,i+1,i+2,j+1,j+2,j-1,j-2
             if(i==0):
-                l = -1
+                l,l1 = -1,-2
             if(j==0):
-                d = -1
+                d,d1 = -1,-2
             if(i == x_point_num-2):
-                r = 0
+                r,r1 = 0,1
             if(j == y_point_num-2):
-                u = 0
-            for index1 in [l,i,r]:
-                for index2 in [d,j,u]:
+                u,u1 = 0,1
+            if(i == 1):
+                l1 = -1
+            if(j == 1):
+                d1 = -1
+            if(i == x_point_num-3):
+                r1 =0
+            if(j == y_point_num-3):
+                u1 = 0
+            for index1 in [l1,l,i,r,r1]:
+                for index2 in [d1,d,j,u,u1]:
                     curvature_list.append(mesh_map[index1][index2][0])
             theta = fit_curve(curvature_list)
             curvature = calculate_k(theta[0],theta[1],theta[2],theta[3],theta[4],theta[5],mesh_map[i][j][0][0],mesh_map[i][j][0][1])
             print(curvature)
-            mesh_map[i][j][2] = curvature
+            mesh_map[i][j][2] = curvature[0]
+            mesh_map[i][j][3] = curvature[1]
                 
 
 

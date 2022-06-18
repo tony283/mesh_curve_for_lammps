@@ -18,4 +18,4 @@ savename = 'D:\membrane.csv'
 
 
 
-mesh.Mesh(0,80,0,80,1,filename,24000,savename)
+mesh.Mesh(0,80,0,80,1,filename,964000,savename)
