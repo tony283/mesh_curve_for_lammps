@@ -93,9 +93,11 @@ def calculate_k(a0,a1,a2,a3,a4,a5,x,y):
 
 def calculate_tension(mesh_map,width):
     tension = 0
+    bend_constant = 0.8
     for i in mesh_map:
         for item in i:
-            tension 
+            tension +=2* item[2]*item[2]*0.8*width*width
+    return tension
 
 
 def fit_curve(datalist):
@@ -112,10 +114,10 @@ def fit_curve(datalist):
 
 
 
-def Save2Csv(datalist,savename):
+def Save2Csv(datalist,savename,tension):
     with open(savename, 'w') as csvFile:
         writer = csv.writer(csvFile)
-        writer.writerow(['Position.X','Position.Y','Position.Z',"Count","Average Curvature", "Gaussian Curvature"])
+        writer.writerow(['Position.X','Position.Y','Position.Z',"Count","Average Curvature", "Gaussian Curvature","Tension: %f"%tension])
         for item1 in datalist:
             for item2 in item1:
                 write_form = [item2[0][0],item2[0][1],item2[0][2],item2[1],item2[2],item2[3]]
@@ -176,8 +178,8 @@ def Mesh(x_low_b, x_high_b, y_low_b, y_high_b, grid_width,filename,timestep,save
             print(curvature)
             mesh_map[i][j][2] = curvature[0]
             mesh_map[i][j][3] = curvature[1]
-                
+    tension = calculate_tension(mesh_map,grid_width)   
 
 
-    Save2Csv(mesh_map,savename)
+    Save2Csv(mesh_map,savename,tension)
 
